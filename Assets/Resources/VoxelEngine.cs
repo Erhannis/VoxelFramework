@@ -94,12 +94,17 @@ public class VoxelEngine : MonoBehaviour {
     public void DoUpdate(Func<int, int, int, float, Color> colorFunc) {
         t += 0.03f;
         Bounds xRayBounds = xRayPlane.GetComponent<Renderer>().bounds;
+        MeshFilter mf = xRayPlane.GetComponent<MeshFilter>();
+        Vector3 normal = mf.mesh.normals[0];
+        normal = xRayPlane.transform.rotation * normal;
+        Debug.Log(normal);
         for (int x = 0; x < xDim; x++) {
             for (int y = 0; y < yDim; y++) {
                 for (int z = 0; z < zDim; z++) {
                     Color color = colorFunc(x, y, z, t);
 
-                    if (objArray[x, y, z].GetComponent<Renderer>().bounds.Intersects(xRayBounds)) {
+                    //objArray[x, y, z].GetComponent<Renderer>().bounds.Intersects(xRayBounds)
+                    if (IsPlaneCubeCollide(normal, , objArray[x, y, z].GetComponent<Renderer>().bounds)) {
                         color.a = 1;
                     }
 
@@ -112,5 +117,44 @@ public class VoxelEngine : MonoBehaviour {
                 }
             }
         }
+    }
+
+    public static bool IsPlaneCubeCollide(Vector3 normal, float planeDistance, Bounds cube) {
+        Vector3 vec1, vec2;
+        Vector3 min = cube.min;
+        Vector3 max = cube.max;
+        if (normal.x >= 0) {
+            vec1.x = min.x;
+            vec2.x = max.x;
+        } else {
+            vec1.x = max.x;
+            vec2.x = min.x;
+        }
+        if (normal.y >= 0) {
+            vec1.y = min.y;
+            vec2.y = max.y;
+        } else {
+            vec1.y = max.y;
+            vec2.y = min.y;
+        }
+        if (normal.z >= 0) {
+            vec1.z = min.z;
+            vec2.z = max.z;
+        } else {
+            vec1.z = max.z;
+            vec2.z = min.z;
+        }
+        float posSide = (normal.x * vec2.x) + (normal.y * vec2.y) + (normal.z * vec2.z) + planeDistance;
+        if (posSide > 0) {
+            //box is completely on positive side of plane
+            return false;
+        }
+        float negSide = (normal.x * vec1.x) + (normal.y * vec1.y) + (normal.z * vec1.z) + planeDistance;
+        if (negSide < 0) {
+            //box is completely on negative side of plane
+            return false;
+        }
+        //if you get this far, box is currently intersecting the plane.
+        return true;
     }
 }
