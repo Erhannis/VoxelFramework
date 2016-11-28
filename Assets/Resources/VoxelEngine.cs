@@ -104,9 +104,11 @@ public class VoxelEngine : MonoBehaviour {
                     Color color = colorFunc(x, y, z, t);
 
                     //objArray[x, y, z].GetComponent<Renderer>().bounds.Intersects(xRayBounds)
+                    /*
                     if (IsPlaneCubeCollide(normal, , objArray[x, y, z].GetComponent<Renderer>().bounds)) {
                         color.a = 1;
                     }
+                    */
 
                     if (color.a <= 0) {
                         objArray[x, y, z].SetActive(false);
