@@ -7,8 +7,9 @@ public class VoxelEngine : MonoBehaviour {
 
     private UnityEngine.Object voxelPrefab;
     private static Vector3 POS = new Vector3(-1, 1, -0.5f);
+    //private static Vector3 POS = new Vector3(0, 0, 0f);
     private static Color TRANSPARENT = new Color(0, 0, 0, 0);
-    private const float SCALE = 0.02f;
+    private const float SCALE = 0.025f;
     private int xDim = 25;
     private int yDim = 25;
     private int zDim = 25;
@@ -97,16 +98,28 @@ public class VoxelEngine : MonoBehaviour {
         MeshFilter mf = xRayPlane.GetComponent<MeshFilter>();
         Vector3 normal = mf.mesh.normals[0];
         normal = xRayPlane.transform.rotation * normal;
-        Debug.Log(normal);
+        // I'm going to assume the normal is a unit vector
+        float offset = -Vector3.Dot(xRayPlane.transform.localToWorldMatrix.MultiplyPoint3x4(mf.mesh.vertices[0]), normal);
+        //Debug.Log(normal);
         for (int x = 0; x < xDim; x++) {
             for (int y = 0; y < yDim; y++) {
                 for (int z = 0; z < zDim; z++) {
                     Color color = colorFunc(x, y, z, t);
 
                     //objArray[x, y, z].GetComponent<Renderer>().bounds.Intersects(xRayBounds)
-                    /*
-                    if (IsPlaneCubeCollide(normal, , objArray[x, y, z].GetComponent<Renderer>().bounds)) {
+                    if (IsPlaneCubeCollide(normal, offset, objArray[x, y, z].GetComponent<Renderer>().bounds)) {
                         color.a = 1;
+                    }
+                    
+                    /*
+                    Bounds bounds = objArray[x, y, z].GetComponent<Renderer>().bounds;
+                    int pos = GetPlaneCubeRelative(normal, offset, bounds);
+                    if (pos > 0) {
+                        color = new Color(1, 0, 0, 1);
+                    } else if (pos < 0) {
+                        color = new Color(0, 0, 1, 1);
+                    } else {
+                        color = new Color(0, 1, 0, 1);
                     }
                     */
 
@@ -121,10 +134,12 @@ public class VoxelEngine : MonoBehaviour {
         }
     }
 
+    // From internet: http://www.gamedev.net/topic/646404-box-vs-plane-collision-detection/
     public static bool IsPlaneCubeCollide(Vector3 normal, float planeDistance, Bounds cube) {
         Vector3 vec1, vec2;
-        Vector3 min = cube.min;
-        Vector3 max = cube.max;
+        // I don't know why I needed to reverse these.  But it works now.
+        Vector3 min = cube.max;
+        Vector3 max = cube.min;
         if (normal.x >= 0) {
             vec1.x = min.x;
             vec2.x = max.x;
@@ -158,5 +173,45 @@ public class VoxelEngine : MonoBehaviour {
         }
         //if you get this far, box is currently intersecting the plane.
         return true;
+    }
+
+    public static int GetPlaneCubeRelative(Vector3 normal, float planeDistance, Bounds cube) {
+        Vector3 vec1, vec2;
+        // I don't know why I needed to reverse these.  But it works now.
+        Vector3 min = cube.max;
+        Vector3 max = cube.min;
+        if (normal.x >= 0) {
+            vec1.x = min.x;
+            vec2.x = max.x;
+        } else {
+            vec1.x = max.x;
+            vec2.x = min.x;
+        }
+        if (normal.y >= 0) {
+            vec1.y = min.y;
+            vec2.y = max.y;
+        } else {
+            vec1.y = max.y;
+            vec2.y = min.y;
+        }
+        if (normal.z >= 0) {
+            vec1.z = min.z;
+            vec2.z = max.z;
+        } else {
+            vec1.z = max.z;
+            vec2.z = min.z;
+        }
+        float posSide = (normal.x * vec2.x) + (normal.y * vec2.y) + (normal.z * vec2.z) + planeDistance;
+        if (posSide > 0) {
+            //box is completely on positive side of plane
+            return 1;
+        }
+        float negSide = (normal.x * vec1.x) + (normal.y * vec1.y) + (normal.z * vec1.z) + planeDistance;
+        if (negSide < 0) {
+            //box is completely on negative side of plane
+            return -1;
+        }
+        //if you get this far, box is currently intersecting the plane.
+        return 0;
     }
 }
