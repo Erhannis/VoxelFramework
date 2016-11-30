@@ -13,6 +13,7 @@ public class WaveEquation : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        //TODO This is not the wave equation yet.
         engine.DoUpdate((x, y, z, t) => {
             float rx = (((float)x) - 12) / 4;
             float ry = (((float)y) - 12) / 4;

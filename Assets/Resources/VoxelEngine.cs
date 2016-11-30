@@ -134,6 +134,21 @@ public class VoxelEngine : MonoBehaviour {
         }
     }
 
+    public int[] GetCubeCoords(Vector3 point) {
+        //TODO This could be constant time
+        for (int x = 0; x < xDim; x++) {
+            for (int y = 0; y < yDim; y++) {
+                for (int z = 0; z < zDim; z++) {
+                    //TODO Also note this won't work right if the grid is angled
+                    if (objArray[x, y, z].GetComponent<Renderer>().bounds.Contains(point)) {
+                        return new int[]{x, y, z};
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     // From internet: http://www.gamedev.net/topic/646404-box-vs-plane-collision-detection/
     public static bool IsPlaneCubeCollide(Vector3 normal, float planeDistance, Bounds cube) {
         Vector3 vec1, vec2;
