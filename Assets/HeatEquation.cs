@@ -32,7 +32,7 @@ public class HeatEquation : MonoBehaviour {
         for (int x = 0; x < W; x++) {
             for (int y = 0; y < D; y++) {
                 for (int z = 0; z < H; z++) {
-                    heat[x, y, z] = TEMP_ROOM + (2*random.NextDouble() - 1);
+                    heat[x, y, z] = TEMP_ROOM + (2*random.NextDouble() - 1.5);
                     heatB[x, y, z] = TEMP_ROOM;
                 }
             }
