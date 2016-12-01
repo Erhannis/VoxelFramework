@@ -16,9 +16,9 @@ public class HeatEquation : MonoBehaviour {
     // Double buffer
     private double[,,] heatB;                 // Kelvin
 
-    private const int W = 50;
-    private const int D = 50;
-    private const int H = 50;
+    private const int W = 10;
+    private const int D = 10;
+    private const int H = 10;
 
     //TODO Relate to actual scale?
     private double voxelSize = 0.0001; // size of a voxel in meters
@@ -40,7 +40,7 @@ public class HeatEquation : MonoBehaviour {
         }
 
         engine = GetComponent<VoxelEngine>();
-        engine.Init(W / 10, H / 10, D / 10);
+        engine.Init(W, H, D);
         //engine = new VoxelEngine(W/10, H/10, D/10, xRayPlane, geomShader, cso);
     }
 

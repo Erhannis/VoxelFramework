@@ -2,9 +2,9 @@
 {
 	Properties
 	{
-		_Sprite("Sprite", 2D) = "white" {}
-		_Color("Color", Color) = (1,1,1,1)
-		_Size("Size", float) = 1
+		//_Sprite("Sprite", 2D) = "white" {}
+		//_Color("Color", Color) = (1,1,1,1)
+		//_Size("Size", float) = 1
 	}
 
 	SubShader
@@ -32,12 +32,12 @@
 
 			//sampler2D _Sprite;
 			//float4 _Color = float4(1,0.5f,0.0f,1);
-			float _Size = 1;
+			//float _Size = 1;
 			matrix world;
 
 			struct data {
 				float3 pos;
-				int renderfaces[6];
+				//int renderfaces[6];
 			};
 
 			struct ColorData {
@@ -62,14 +62,15 @@
 				float3 normal: NORMAL0;
 				float2 uv : TEXCOORD0;
 				float4 color : COLOR;
-				int faces[6] : NORMAL1;
+				//int faces[6] : NORMAL1;
 			};
 
 			inputGS vert(uint id : SV_VertexID)
 			{
 				inputGS o;
-				o.pos = float4(buf_Points[id].pos * _Size, 1.0f);
-				o.faces = buf_Points[id].renderfaces;
+				//o.pos = float4(buf_Points[id].pos * _Size, 1.0f);
+				o.pos = float4(buf_Points[id].pos, 1.0f);
+				//o.faces = buf_Points[id].renderfaces;
 				o.color = buf_Colors[id].color;
 				return o;
 			}
@@ -77,7 +78,8 @@
 			[maxvertexcount(24)]
 			void geom(point inputGS p[1], inout TriangleStream<input> triStream)
 			{
-				float halfS = _Size;
+				//float halfS = _Size;
+				float halfS = 0.5f;
 
 				float2 uvs[4];
 
@@ -140,25 +142,18 @@
 
 				for (int f = 0; f < 6; f++) 
 				{
-					//if (p[0].faces[f] != 0)
-					//{
-						for (int fv = 0; fv < 4; fv++)
-						{
-							pIn.pos = mul(UNITY_MATRIX_VP, mul(world, v[vidx]));
-							pIn.uv = uvs[fv];
-							pIn.normal = normals[f];
-							pIn.color = p[0].color;
-							UNITY_TRANSFER_FOG(pIn, pIn.pos);
-							triStream.Append(pIn);
+					for (int fv = 0; fv < 4; fv++)
+					{
+						pIn.pos = mul(UNITY_MATRIX_VP, mul(world, v[vidx]));
+						pIn.uv = uvs[fv];
+						pIn.normal = normals[f];
+						pIn.color = p[0].color;
+						UNITY_TRANSFER_FOG(pIn, pIn.pos);
+						triStream.Append(pIn);
 
-							vidx++;
-						}
-						triStream.RestartStrip();
-					//}
-					//else
-					//{
-					//	vidx += 4;
-					//}
+						vidx++;
+					}
+					triStream.RestartStrip();
 				}
 			}
 
