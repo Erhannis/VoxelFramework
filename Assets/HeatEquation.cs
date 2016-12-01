@@ -16,13 +16,14 @@ public class HeatEquation : MonoBehaviour {
     // Double buffer
     private double[,,] heatB;                 // Kelvin
 
-    private const int W = 20;
-    private const int D = 20;
-    private const int H = 20;
+    private const int W = 50;
+    private const int D = 50;
+    private const int H = 50;
 
+    //TODO Relate to actual scale?
     private double voxelSize = 0.0001; // size of a voxel in meters
     private double tickDur = 0.1; // Duration of a tick in seconds
-    private double heatAlpha = 0.0001; // Alpha in the heat equation
+    private double heatAlpha = 0.00001; // Alpha in the heat equation
 
     // Use this for initialization
     void Start () {
@@ -32,13 +33,15 @@ public class HeatEquation : MonoBehaviour {
         for (int x = 0; x < W; x++) {
             for (int y = 0; y < D; y++) {
                 for (int z = 0; z < H; z++) {
-                    heat[x, y, z] = TEMP_ROOM + (2*random.NextDouble() - 1.5);
+                    heat[x, y, z] = TEMP_ROOM + (2*random.NextDouble() - 1);
                     heatB[x, y, z] = TEMP_ROOM;
                 }
             }
         }
 
-        engine = new VoxelEngine(W, H, D, xRayPlane);
+        engine = GetComponent<VoxelEngine>();
+        engine.Init(W / 10, H / 10, D / 10);
+        //engine = new VoxelEngine(W/10, H/10, D/10, xRayPlane, geomShader, cso);
     }
 
     // Update is called once per frame

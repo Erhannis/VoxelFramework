@@ -30,8 +30,8 @@
 
 			#include "UnityCG.cginc"
 
-			sampler2D _Sprite;
-			float4 _Color = float4(1,0.5f,0.0f,1);
+			//sampler2D _Sprite;
+			//float4 _Color = float4(1,0.5f,0.0f,1);
 			float _Size = 1;
 			matrix world;
 
@@ -140,8 +140,8 @@
 
 				for (int f = 0; f < 6; f++) 
 				{
-					if (p[0].faces[f] != 0 || true)
-					{
+					//if (p[0].faces[f] != 0)
+					//{
 						for (int fv = 0; fv < 4; fv++)
 						{
 							pIn.pos = mul(UNITY_MATRIX_VP, mul(world, v[vidx]));
@@ -154,11 +154,11 @@
 							vidx++;
 						}
 						triStream.RestartStrip();
-					}
-					else
-					{
-						vidx += 4;
-					}
+					//}
+					//else
+					//{
+					//	vidx += 4;
+					//}
 				}
 			}
 

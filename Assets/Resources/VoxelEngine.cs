@@ -5,71 +5,59 @@ using System;
 public class VoxelEngine : MonoBehaviour {
     public GameObject xRayPlane;
 
-    private UnityEngine.Object voxelPrefab;
+    public Shader geomShader;
+    public VoxelComputeShaderOutput cso;
+
+    Material material;
+    public float size = 0.1f;
+
+
     private static Vector3 POS = new Vector3(-1, 1, -0.5f);
     //private static Vector3 POS = new Vector3(0, 0, 0f);
-    private static Color TRANSPARENT = new Color(0, 0, 0, 0);
     private const float SCALE = 0.025f;
-    private int xDim = 25;
-    private int yDim = 25;
-    private int zDim = 25;
+    private int xBlocksDim = 10;
+    private int yBlocksDim = 10;
+    private int zBlocksDim = 10;
+    Color[] colorArray;
+    private bool getData;
 
-    private float[,,] values;
-    private GameObject[,,] objArray;
-    private Material[,,] matArray;
-    private int colorId;
-    private GameObject voxelRoot;
+    //private float[,,] values;
     private long startTime;
     private float t = 0;
 
-    public VoxelEngine(int xDim, int yDim, int zDim, GameObject xRayPlane) {
+    public VoxelEngine(int xDim, int yDim, int zDim, GameObject xRayPlane, Shader geomShader, VoxelComputeShaderOutput cso) {
         this.xRayPlane = xRayPlane;
+        this.geomShader = geomShader;
+        this.cso = cso;
         Init(xDim, yDim, zDim);
     }
 
     // Use this for initialization
     void Start() {
-        Init(25, 25, 25);
+        //Init(10, 10, 10);
     }
 
-    private void Init(int xDim, int yDim, int zDim) {
-        voxelPrefab = Resources.Load("Voxel");
-        this.xDim = xDim;
-        this.yDim = yDim;
-        this.zDim = zDim;
+    public void Init(int xDim, int yDim, int zDim) {
+        getData = true;
+        this.xBlocksDim = xDim;
+        this.yBlocksDim = yDim;
+        this.zBlocksDim = zDim;
 
-        voxelRoot = new GameObject();
-        voxelRoot.transform.position = POS;
-        voxelRoot.transform.localScale = new Vector3(SCALE, SCALE, SCALE);
-        colorId = Shader.PropertyToID("_TintColor");
-        objArray = new GameObject[xDim, yDim, zDim];
-        matArray = new Material[xDim, yDim, zDim];
-        //startTime = System.cu
+        colorArray = new Color[10 * 10 * 10 * xBlocksDim * yBlocksDim * zBlocksDim];
 
-        for (int x = 0; x < xDim; x++) {
-            for (int y = 0; y < yDim; y++) {
-                for (int z = 0; z < zDim; z++) {
-                    GameObject voxel = MakeVoxel(new Vector3(x, y, z));
-                    voxel.transform.SetParent(voxelRoot.transform, false);
-                    objArray[x, y, z] = voxel;
-                    matArray[x, y, z] = voxel.GetComponent<Renderer>().material;
-                    matArray[x, y, z].SetColor(colorId, UnityEngine.Random.ColorHSV(0, 1, 0, 1, 0, 1, 0, 0.01f));
-                }
-            }
-        }
-    }
+        material = new Material(geomShader);
 
-    private GameObject MakeVoxel(Vector3 pos) {
-        GameObject voxel = (GameObject)Instantiate(voxelPrefab, pos, Quaternion.identity);
-        return voxel;
+        cso = GetComponent<VoxelComputeShaderOutput>();
+
+        //TODO Init points?
     }
 
     // Update is called once per frame
     void Update() {
-        DoUpdate((x, y, z, t) => {
-            float val = Mathf.Sin(-t + Mathf.Sqrt((x * x) + (y * y) + (z * z)));
-            return RedBlueValue(val, 0.5f);
-        });
+        //DoUpdate((x, y, z, t) => {
+        //    float val = Mathf.Sin(-t + Mathf.Sqrt((x * x) + (y * y) + (z * z)));
+        //    return RedBlueValue(val, 0.5f);
+        //});
     }
 
     public static Color RedBlueValue(float val) {
@@ -83,11 +71,9 @@ public class VoxelEngine : MonoBehaviour {
     public static Color RedBlueValue(float val, float cutoff, float brightness) {
         if (val >= 0) {
             float alpha = (brightness * ((val - cutoff) / (1f - cutoff)));
-            //if (alpha <= 0) {return TRANSPARENT;}
             return new Color(1, 0, 0, alpha);
         } else {
             float alpha = (brightness * ((-val - cutoff) / (1f - cutoff)));
-            //if (alpha <= 0) {return TRANSPARENT;}
             return new Color(0, 0, 1, alpha);
         }
     }
@@ -101,15 +87,18 @@ public class VoxelEngine : MonoBehaviour {
         // I'm going to assume the normal is a unit vector
         float offset = -Vector3.Dot(xRayPlane.transform.localToWorldMatrix.MultiplyPoint3x4(mf.mesh.vertices[0]), normal);
         //Debug.Log(normal);
-        for (int x = 0; x < xDim; x++) {
-            for (int y = 0; y < yDim; y++) {
-                for (int z = 0; z < zDim; z++) {
+        for (int x = 0; x < (10 * xBlocksDim); x++) {
+            for (int y = 0; y < (10 * yBlocksDim); y++) {
+                for (int z = 0; z < (10 * zBlocksDim); z++) {
+                    int idx = x + (y * 10 * xBlocksDim) + (z * 10 * xBlocksDim * 10 * yBlocksDim);
+
                     Color color = colorFunc(x, y, z, t);
 
-                    //objArray[x, y, z].GetComponent<Renderer>().bounds.Intersects(xRayBounds)
-                    if (IsPlaneCubeCollide(normal, offset, objArray[x, y, z].GetComponent<Renderer>().bounds)) {
-                        color.a = 1;
-                    }
+                    //TODO Fix alpha
+                    //TODO Fix plane stuff
+                    //if (IsPlaneCubeCollide(normal, offset, asdf)) {
+                    //    color.a = 1;
+                    //}
                     
                     /*
                     Bounds bounds = objArray[x, y, z].GetComponent<Renderer>().bounds;
@@ -124,37 +113,41 @@ public class VoxelEngine : MonoBehaviour {
                     */
 
                     if (color.a <= 0) {
-                        objArray[x, y, z].SetActive(false);
+                        //TODO Can I do the equivalent of SetActive(false) here?
                     } else {
-                        matArray[x, y, z].SetColor(colorId, color);
-                        objArray[x, y, z].SetActive(true);
+                        //TODO or set color and active=true
                     }
+                    colorArray[idx] = color;
                 }
             }
         }
+        cso.colorBuffer.SetData(colorArray);
     }
 
     public int[] GetCubeCoords(Vector3 point) {
         //TODO This could be constant time
-        for (int x = 0; x < xDim; x++) {
-            for (int y = 0; y < yDim; y++) {
-                for (int z = 0; z < zDim; z++) {
+        //TODO Ugh, do we have to do all this 10 * blocksDim?
+        //TODO Fix
+        /*
+        for (int x = 0; x < (10 * xBlocksDim); x++) {
+            for (int y = 0; y < (10 * yBlocksDim); y++) {
+                for (int z = 0; z < (10 * zBlocksDim); z++) {
                     //TODO Also note this won't work right if the grid is angled
                     if (objArray[x, y, z].GetComponent<Renderer>().bounds.Contains(point)) {
                         return new int[]{x, y, z};
                     }
                 }
             }
-        }
+        }*/
         return null;
     }
 
     // From internet: http://www.gamedev.net/topic/646404-box-vs-plane-collision-detection/
-    public static bool IsPlaneCubeCollide(Vector3 normal, float planeDistance, Bounds cube) {
+    public static bool IsPlaneCubeCollide(Vector3 normal, float planeDistance, Vector3 cubeMin, Vector3 cubeMax) {
         Vector3 vec1, vec2;
         // I don't know why I needed to reverse these.  But it works now.
-        Vector3 min = cube.max;
-        Vector3 max = cube.min;
+        Vector3 min = cubeMax;
+        Vector3 max = cubeMin;
         if (normal.x >= 0) {
             vec1.x = min.x;
             vec2.x = max.x;
@@ -228,5 +221,41 @@ public class VoxelEngine : MonoBehaviour {
         }
         //if you get this far, box is currently intersecting the plane.
         return 0;
+    }
+
+    public void OnRenderObject() {
+        if (getData) {
+            getData = false;
+            cso.Dispatch();
+        }
+        /*
+        for (int x = 0; x < (10 * xBlocksDim); x++) {
+            for (int y = 0; y < (10 * yBlocksDim); y++) {
+                for (int z = 0; z < (10 * zBlocksDim); z++) {
+                    int idx = x + (y * 10 * xBlocksDim) + (z * 10 * xBlocksDim * 10 * yBlocksDim);
+
+                    Color c = UnityEngine.Random.ColorHSV();
+                    c.a = 0.1f;
+                    c.r *= 0.01f;
+                    c.g *= 0.01f;
+                    c.b *= 0.01f;
+                    colorArray[idx] = c;
+                }
+            }
+        }
+        cso.colorBuffer.SetData(colorArray);
+        */
+
+
+        material.SetPass(0);
+        //material.SetColor("_Color", color);
+        material.SetBuffer("buf_Points", cso.outputBuffer);
+        material.SetBuffer("buf_Colors", cso.colorBuffer);
+        //material.SetTexture("_Sprite", sprite);
+
+        material.SetFloat("_Size", size);
+        material.SetMatrix("world", transform.localToWorldMatrix);
+
+        Graphics.DrawProcedural(MeshTopology.Points, cso.outputBuffer.count);
     }
 }

@@ -54,10 +54,10 @@ public class VoxelGeomScript : MonoBehaviour
         left = !left;
 
         material.SetPass(0);
-        material.SetColor("_Color", color);
+        //material.SetColor("_Color", color);
         material.SetBuffer("buf_Points", cso.outputBuffer);
         material.SetBuffer("buf_Colors", cso.colorBuffer);
-        material.SetTexture("_Sprite", sprite);
+        //material.SetTexture("_Sprite", sprite);
 
         material.SetFloat("_Size", size);
         material.SetMatrix("world", transform.localToWorldMatrix);

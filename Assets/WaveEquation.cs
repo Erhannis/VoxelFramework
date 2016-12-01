@@ -3,12 +3,15 @@ using System.Collections;
 
 public class WaveEquation : MonoBehaviour {
     public GameObject xRayPlane;
+    public Shader geomShader;
+    public VoxelComputeShaderOutput cso;
 
     private VoxelEngine engine;
 
 	// Use this for initialization
 	void Start () {
-        engine = new VoxelEngine(25, 25, 25, xRayPlane);
+        cso = GetComponent<VoxelComputeShaderOutput>();
+        engine = new VoxelEngine(25, 25, 25, xRayPlane, geomShader, cso);
 	}
 	
 	// Update is called once per frame
