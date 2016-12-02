@@ -16,9 +16,9 @@ public class HeatEquation : MonoBehaviour {
     // Double buffer
     private double[,,] heatB;                 // Kelvin
 
-    private const int W = 10;
-    private const int D = 10;
-    private const int H = 10;
+    private const int W = 25;
+    private const int D = 25;
+    private const int H = 25;
 
     //TODO Relate to actual scale?
     private double voxelSize = 0.0001; // size of a voxel in meters
@@ -33,7 +33,7 @@ public class HeatEquation : MonoBehaviour {
         for (int x = 0; x < W; x++) {
             for (int y = 0; y < D; y++) {
                 for (int z = 0; z < H; z++) {
-                    heat[x, y, z] = TEMP_ROOM + (2*random.NextDouble() - 1);
+                    heat[x, y, z] = TEMP_ROOM + (2*random.NextDouble() - 1.5);
                     heatB[x, y, z] = TEMP_ROOM;
                 }
             }
@@ -57,8 +57,8 @@ public class HeatEquation : MonoBehaviour {
             }
         }
         int[] heatSpot = engine.GetCubeCoords(heatWand.transform.position);
-        if (heatSpot != null) {
-            //Debug.Log("(" + heatSpot[0] + ", " + heatSpot[1] + ", " + heatSpot[2] + ")");
+        Debug.Log(heatWand.transform.position + "(" + heatSpot[0] + ", " + heatSpot[1] + ", " + heatSpot[2] + ")");
+        if (heatSpot != null && heatSpot[0] >= 0 && heatSpot[0] < W && heatSpot[1] >= 0 && heatSpot[1] < H && heatSpot[2] >= 0 && heatSpot[2] < D) {
             heatB[heatSpot[0], heatSpot[1], heatSpot[2]] += 1;
         }
     

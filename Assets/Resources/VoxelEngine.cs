@@ -47,7 +47,7 @@ public class VoxelEngine : MonoBehaviour {
         colorBuffer = new ComputeBuffer(vertCount, (sizeof(float) * 4));
 
         Vector3[] points = new Vector3[xDim * yDim * zDim];
-        /*
+        
         int idx = 0;
         for (int z = 0; z < zDim; z++) {
             for (int y = 0; y < yDim; y++) {
@@ -56,7 +56,8 @@ public class VoxelEngine : MonoBehaviour {
                     points[idx++] = new Vector3(x, y, z);
                 }
             }
-        }*/
+        }
+        /*
         for (int x = 0; x < xDim; x++) {
             for (int y = 0; y < yDim; y++) {
                 for (int z = 0; z < zDim; z++) {
@@ -65,6 +66,7 @@ public class VoxelEngine : MonoBehaviour {
                 }
             }
         }
+        */
         outputBuffer.SetData(points);
         points = null;
 
@@ -90,6 +92,7 @@ public class VoxelEngine : MonoBehaviour {
     }
 
     public static Color RedBlueValue(float val, float cutoff, float brightness) {
+        //TODO Fix alpha rendering
         if (val >= 0) {
             float alpha = (brightness * ((val - cutoff) / (1f - cutoff)));
             //return new Color(1, 0, 0, alpha);
@@ -148,6 +151,11 @@ public class VoxelEngine : MonoBehaviour {
     }
 
     public int[] GetCubeCoords(Vector3 point) {
+        //TODO Uh...this gives the wrong result???
+        //Vector3 localPoint = (transform.worldToLocalMatrix * point);
+        Vector3 localPoint = transform.worldToLocalMatrix.MultiplyPoint(point);
+        localPoint = localPoint + new Vector3(0.5f, 0.5f, 0.5f);
+        return new int[]{Mathf.FloorToInt(localPoint.x), Mathf.FloorToInt(localPoint.y), Mathf.FloorToInt(localPoint.z)};
         //TODO This could be constant time
         //TODO Ugh, do we have to do all this 10 * blocksDim?
         //TODO Fix
@@ -162,7 +170,6 @@ public class VoxelEngine : MonoBehaviour {
                 }
             }
         }*/
-        return null;
     }
 
     // From internet: http://www.gamedev.net/topic/646404-box-vs-plane-collision-detection/
