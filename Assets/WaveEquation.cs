@@ -14,8 +14,8 @@ public class WaveEquation : MonoBehaviour {
     private double[,,] ampOld;
 
     private const int W = 25;
-    private const int D = 25;
     private const int H = 25;
+    private const int D = 100;
 
     //TODO THESE CONSTANTS ARE INAPPLICABLE
     private double voxelSize = 0.0001; // size of a voxel in meters
@@ -24,13 +24,13 @@ public class WaveEquation : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        ampFuture = new double[W, D, H];
-        amp = new double[W, D, H];
-        ampOld = new double[W, D, H];
+        ampFuture = new double[W, H, D];
+        amp = new double[W, H, D];
+        ampOld = new double[W, H, D];
 
         for (int x = 0; x < W; x++) {
-            for (int y = 0; y < D; y++) {
-                for (int z = 0; z < H; z++) {
+            for (int y = 0; y < H; y++) {
+                for (int z = 0; z < D; z++) {
                     amp[x, y, z] = 0;
                     ampOld[x, y, z] = 0;
                 }
@@ -48,10 +48,10 @@ public class WaveEquation : MonoBehaviour {
         //       should maybe be squared, for instance.
         double dt2c2 = heatAlpha * tickDur / voxelSize;
         for (int x = 0; x < W; x++) {
-            for (int y = 0; y < D; y++) {
-                for (int z = 0; z < H; z++) {
+            for (int y = 0; y < H; y++) {
+                for (int z = 0; z < D; z++) {
                     double ac = amp[x, y, z];
-                    ampFuture[x, y, z] = (2*ac) - ampOld[x, y, z] + (dt2c2 * (amp[Math.Max(x - 1, 0), y, z] + amp[Math.Min(x + 1, W - 1), y, z] + amp[x, Math.Max(y - 1, 0), z] + amp[x, Math.Min(y + 1, D - 1), z] + amp[x, y, Math.Max(z - 1, 0)] + amp[x, y, Math.Min(z + 1, H - 1)] - (6 * ac)));
+                    ampFuture[x, y, z] = (2*ac) - ampOld[x, y, z] + (dt2c2 * (amp[Math.Max(x - 1, 0), y, z] + amp[Math.Min(x + 1, W - 1), y, z] + amp[x, Math.Max(y - 1, 0), z] + amp[x, Math.Min(y + 1, H - 1), z] + amp[x, y, Math.Max(z - 1, 0)] + amp[x, y, Math.Min(z + 1, D - 1)] - (6 * ac)));
                 }
             }
         }

@@ -17,8 +17,8 @@ public class HeatEquation : MonoBehaviour {
     private double[,,] heatB;                 // Kelvin
 
     private const int W = 25;
-    private const int D = 25;
     private const int H = 25;
+    private const int D = 25;
 
     //TODO Relate to actual scale?
     private double voxelSize = 0.0001; // size of a voxel in meters
@@ -27,12 +27,12 @@ public class HeatEquation : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        heat = new double[W, D, H];
-        heatB = new double[W, D, H];
+        heat = new double[W, H, D];
+        heatB = new double[W, H, D];
 
         for (int x = 0; x < W; x++) {
-            for (int y = 0; y < D; y++) {
-                for (int z = 0; z < H; z++) {
+            for (int y = 0; y < H; y++) {
+                for (int z = 0; z < D; z++) {
                     heat[x, y, z] = TEMP_ROOM + (2*random.NextDouble() - 1.5);
                     heatB[x, y, z] = TEMP_ROOM;
                 }
@@ -50,10 +50,10 @@ public class HeatEquation : MonoBehaviour {
         //       should maybe be squared, for instance.
         double r = heatAlpha * tickDur / voxelSize;
         for (int x = 0; x < W; x++) {
-            for (int y = 0; y < D; y++) {
-                for (int z = 0; z < H; z++) {
+            for (int y = 0; y < H; y++) {
+                for (int z = 0; z < D; z++) {
                     double hc = heat[x, y, z];
-                    heatB[x, y, z] = hc + (r * (heat[Math.Max(x - 1, 0), y, z] + heat[Math.Min(x + 1, W - 1), y, z] + heat[x, Math.Max(y - 1, 0), z] + heat[x, Math.Min(y + 1, D - 1), z] + heat[x, y, Math.Max(z - 1, 0)] + heat[x, y, Math.Min(z + 1, H - 1)] - (6 * hc)));
+                    heatB[x, y, z] = hc + (r * (heat[Math.Max(x - 1, 0), y, z] + heat[Math.Min(x + 1, W - 1), y, z] + heat[x, Math.Max(y - 1, 0), z] + heat[x, Math.Min(y + 1, H - 1), z] + heat[x, y, Math.Max(z - 1, 0)] + heat[x, y, Math.Min(z + 1, D - 1)] - (6 * hc)));
                 }
             }
         }
