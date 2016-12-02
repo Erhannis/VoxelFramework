@@ -41,12 +41,13 @@ public class HeatEquation : MonoBehaviour {
 
         engine = GetComponent<VoxelEngine>();
         engine.Init(W, H, D);
-        //engine = new VoxelEngine(W/10, H/10, D/10, xRayPlane, geomShader, cso);
     }
 
     // Update is called once per frame
     void Update () {
         //TODO Do threading?  GPU?
+        //TODO Not sure if these constants are technically used right - I think voxelSize
+        //       should maybe be squared, for instance.
         double r = heatAlpha * tickDur / voxelSize;
         for (int x = 0; x < W; x++) {
             for (int y = 0; y < D; y++) {

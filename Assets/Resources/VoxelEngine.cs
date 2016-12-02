@@ -123,7 +123,7 @@ public class VoxelEngine : MonoBehaviour {
                         Color color = colorFunc(x, y, z, t);
 
                         //TODO Fix alpha
-                        //TODO Fix plane stuff
+                        //TODO Ignore cutoff...?
                         if (IsPlaneCubeCollide(normal, offset, new Vector3(x - 0.5f, y - 0.5f, z - 0.5f), new Vector3(x + 0.5f, y + 0.5f, z + 0.5f))) {
                             if (color.r > 0) {
                                 color.r = 1;
