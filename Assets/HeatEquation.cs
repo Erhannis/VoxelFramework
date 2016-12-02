@@ -57,16 +57,14 @@ public class HeatEquation : MonoBehaviour {
             }
         }
         int[] heatSpot = engine.GetCubeCoords(heatWand.transform.position);
-        Debug.Log(heatWand.transform.position + "(" + heatSpot[0] + ", " + heatSpot[1] + ", " + heatSpot[2] + ")");
-        if (heatSpot != null && heatSpot[0] >= 0 && heatSpot[0] < W && heatSpot[1] >= 0 && heatSpot[1] < H && heatSpot[2] >= 0 && heatSpot[2] < D) {
+        //Debug.Log(heatWand.transform.position + "(" + heatSpot[0] + ", " + heatSpot[1] + ", " + heatSpot[2] + ")");
+        if (heatSpot != null) {
             heatB[heatSpot[0], heatSpot[1], heatSpot[2]] += 1;
         }
     
         // Swap out buffer
         double[,,] heatSwap = heat;
-
         heat = heatB;
-    
         heatB = heatSwap;
 
         engine.DoUpdate((x, y, z, t) => {

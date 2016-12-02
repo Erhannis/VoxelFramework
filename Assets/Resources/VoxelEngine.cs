@@ -161,9 +161,18 @@ public class VoxelEngine : MonoBehaviour {
     }
 
     public int[] GetCubeCoords(Vector3 point) {
+        return GetCubeCoords(point, true);
+    }
+
+    public int[] GetCubeCoords(Vector3 point, bool nullOutsideRange) {
         Vector3 localPoint = transform.worldToLocalMatrix.MultiplyPoint3x4(point);
         localPoint = localPoint + new Vector3(0.5f, 0.5f, 0.5f);
-        return new int[]{Mathf.FloorToInt(localPoint.x), Mathf.FloorToInt(localPoint.y), Mathf.FloorToInt(localPoint.z)};
+        int[] result = new int[]{Mathf.FloorToInt(localPoint.x), Mathf.FloorToInt(localPoint.y), Mathf.FloorToInt(localPoint.z)};
+        if (result[0] < 0 || result[0] >= xDim || result[1] < 0 || result[1] >= yDim || result[2] < 0 || result[2] >= zDim) {
+            return null;
+        } else {
+            return result;
+        }
     }
 
     // From internet: http://www.gamedev.net/topic/646404-box-vs-plane-collision-detection/
