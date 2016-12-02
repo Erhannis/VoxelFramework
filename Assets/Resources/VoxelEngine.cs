@@ -106,54 +106,61 @@ public class VoxelEngine : MonoBehaviour {
 
     public void DoUpdate(Func<int, int, int, float, Color> colorFunc) {
         t += 0.03f;
-        Bounds xRayBounds = xRayPlane.GetComponent<Renderer>().bounds;
-        MeshFilter mf = xRayPlane.GetComponent<MeshFilter>();
-        Vector3 normal = mf.mesh.normals[0];
-        normal = xRayPlane.transform.rotation * normal;
-        normal = Quaternion.Inverse(transform.rotation) * normal;
-        // I'm going to assume the normal is a unit vector
-        float offset = -Vector3.Dot(transform.worldToLocalMatrix.MultiplyPoint3x4(xRayPlane.transform.localToWorldMatrix.MultiplyPoint3x4(mf.mesh.vertices[0])), normal);
-        //Debug.Log(normal);
-        for (int x = 0; x < xDim; x++) {
-            for (int y = 0; y < yDim; y++) {
-                for (int z = 0; z < zDim; z++) {
-                    int idx = x + (y * xDim) + (z * xDim * yDim);
+        if (xRayPlane != null) {
+            Bounds xRayBounds = xRayPlane.GetComponent<Renderer>().bounds;
+            MeshFilter mf = xRayPlane.GetComponent<MeshFilter>();
+            Vector3 normal = mf.mesh.normals[0];
+            normal = xRayPlane.transform.rotation * normal;
+            normal = Quaternion.Inverse(transform.rotation) * normal;
+            // I'm going to assume the normal is a unit vector
+            float offset = -Vector3.Dot(transform.worldToLocalMatrix.MultiplyPoint3x4(xRayPlane.transform.localToWorldMatrix.MultiplyPoint3x4(mf.mesh.vertices[0])), normal);
+            //Debug.Log(normal);
+            for (int x = 0; x < xDim; x++) {
+                for (int y = 0; y < yDim; y++) {
+                    for (int z = 0; z < zDim; z++) {
+                        int idx = x + (y * xDim) + (z * xDim * yDim);
 
-                    Color color = colorFunc(x, y, z, t);
+                        Color color = colorFunc(x, y, z, t);
 
-                    //TODO Fix alpha
-                    //TODO Fix plane stuff
-                    if (IsPlaneCubeCollide(normal, offset, new Vector3(x - 0.5f, y - 0.5f, z - 0.5f), new Vector3(x + 0.5f, y + 0.5f, z + 0.5f))) {
-                        if (color.r > 0) {
-                            color.r = 1;
+                        //TODO Fix alpha
+                        //TODO Fix plane stuff
+                        if (IsPlaneCubeCollide(normal, offset, new Vector3(x - 0.5f, y - 0.5f, z - 0.5f), new Vector3(x + 0.5f, y + 0.5f, z + 0.5f))) {
+                            if (color.r > 0) {
+                                color.r = 1;
+                            }
+                            if (color.g > 0) {
+                                color.g = 1;
+                            }
+                            if (color.b > 0) {
+                                color.b = 1;
+                            }
+                            color.a = 1;
                         }
-                        if (color.g > 0) {
-                            color.g = 1;
-                        }
-                        if (color.b > 0) {
-                            color.b = 1;
-                        }
-                        color.a = 1;
-                    }
-                    
-                    /*
-                    Bounds bounds = objArray[x, y, z].GetComponent<Renderer>().bounds;
-                    int pos = GetPlaneCubeRelative(normal, offset, bounds);
-                    if (pos > 0) {
-                        color = new Color(1, 0, 0, 1);
-                    } else if (pos < 0) {
-                        color = new Color(0, 0, 1, 1);
-                    } else {
-                        color = new Color(0, 1, 0, 1);
-                    }
-                    */
 
-                    if (color.a <= 0) {
-                        //TODO Can I do the equivalent of SetActive(false) here?
-                    } else {
-                        //TODO or set color and active=true
+                        if (color.a <= 0) {
+                            //TODO Can I do the equivalent of SetActive(false) here?
+                        } else {
+                            //TODO or set color and active=true
+                        }
+                        colorArray[idx] = color;
                     }
-                    colorArray[idx] = color;
+                }
+            }
+        } else {
+            for (int x = 0; x < xDim; x++) {
+                for (int y = 0; y < yDim; y++) {
+                    for (int z = 0; z < zDim; z++) {
+                        int idx = x + (y * xDim) + (z * xDim * yDim);
+
+                        Color color = colorFunc(x, y, z, t);
+
+                        if (color.a <= 0) {
+                            //TODO Can I do the equivalent of SetActive(false) here?
+                        } else {
+                            //TODO or set color and active=true
+                        }
+                        colorArray[idx] = color;
+                    }
                 }
             }
         }
