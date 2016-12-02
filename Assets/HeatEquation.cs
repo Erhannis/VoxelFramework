@@ -70,7 +70,7 @@ public class HeatEquation : MonoBehaviour {
         heatB = heatSwap;
 
         engine.DoUpdate((x, y, z, t) => {
-            return VoxelEngine.RedBlueValue((float)(heat[x, y, z] - TEMP_ROOM), 0.0f, 0.01f);
+            return VoxelEngine.RedBlueValue((float)(heat[x, y, z] - TEMP_ROOM), 0.2f, 0.01f);
         });
     }
 }

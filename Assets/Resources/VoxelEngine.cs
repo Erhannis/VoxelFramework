@@ -110,8 +110,9 @@ public class VoxelEngine : MonoBehaviour {
         MeshFilter mf = xRayPlane.GetComponent<MeshFilter>();
         Vector3 normal = mf.mesh.normals[0];
         normal = xRayPlane.transform.rotation * normal;
+        normal = Quaternion.Inverse(transform.rotation) * normal;
         // I'm going to assume the normal is a unit vector
-        float offset = -Vector3.Dot(xRayPlane.transform.localToWorldMatrix.MultiplyPoint3x4(mf.mesh.vertices[0]), normal);
+        float offset = -Vector3.Dot(transform.worldToLocalMatrix.MultiplyPoint3x4(xRayPlane.transform.localToWorldMatrix.MultiplyPoint3x4(mf.mesh.vertices[0])), normal);
         //Debug.Log(normal);
         for (int x = 0; x < xDim; x++) {
             for (int y = 0; y < yDim; y++) {
@@ -122,9 +123,18 @@ public class VoxelEngine : MonoBehaviour {
 
                     //TODO Fix alpha
                     //TODO Fix plane stuff
-                    //if (IsPlaneCubeCollide(normal, offset, asdf)) {
-                    //    color.a = 1;
-                    //}
+                    if (IsPlaneCubeCollide(normal, offset, new Vector3(x - 0.5f, y - 0.5f, z - 0.5f), new Vector3(x + 0.5f, y + 0.5f, z + 0.5f))) {
+                        if (color.r > 0) {
+                            color.r = 1;
+                        }
+                        if (color.g > 0) {
+                            color.g = 1;
+                        }
+                        if (color.b > 0) {
+                            color.b = 1;
+                        }
+                        color.a = 1;
+                    }
                     
                     /*
                     Bounds bounds = objArray[x, y, z].GetComponent<Renderer>().bounds;
@@ -151,25 +161,9 @@ public class VoxelEngine : MonoBehaviour {
     }
 
     public int[] GetCubeCoords(Vector3 point) {
-        //TODO Uh...this gives the wrong result???
-        //Vector3 localPoint = (transform.worldToLocalMatrix * point);
-        Vector3 localPoint = transform.worldToLocalMatrix.MultiplyPoint(point);
+        Vector3 localPoint = transform.worldToLocalMatrix.MultiplyPoint3x4(point);
         localPoint = localPoint + new Vector3(0.5f, 0.5f, 0.5f);
         return new int[]{Mathf.FloorToInt(localPoint.x), Mathf.FloorToInt(localPoint.y), Mathf.FloorToInt(localPoint.z)};
-        //TODO This could be constant time
-        //TODO Ugh, do we have to do all this 10 * blocksDim?
-        //TODO Fix
-        /*
-        for (int x = 0; x < (10 * xBlocksDim); x++) {
-            for (int y = 0; y < (10 * yBlocksDim); y++) {
-                for (int z = 0; z < (10 * zBlocksDim); z++) {
-                    //TODO Also note this won't work right if the grid is angled
-                    if (objArray[x, y, z].GetComponent<Renderer>().bounds.Contains(point)) {
-                        return new int[]{x, y, z};
-                    }
-                }
-            }
-        }*/
     }
 
     // From internet: http://www.gamedev.net/topic/646404-box-vs-plane-collision-detection/
@@ -254,30 +248,10 @@ public class VoxelEngine : MonoBehaviour {
     }
 
     public void OnRenderObject() {
-        /*
-        for (int x = 0; x < (10 * xBlocksDim); x++) {
-            for (int y = 0; y < (10 * yBlocksDim); y++) {
-                for (int z = 0; z < (10 * zBlocksDim); z++) {
-                    int idx = x + (y * 10 * xBlocksDim) + (z * 10 * xBlocksDim * 10 * yBlocksDim);
-
-                    Color c = UnityEngine.Random.ColorHSV();
-                    c.a = 0.1f;
-                    c.r *= 0.01f;
-                    c.g *= 0.01f;
-                    c.b *= 0.01f;
-                    colorArray[idx] = c;
-                }
-            }
-        }
-        cso.colorBuffer.SetData(colorArray);
-        */
-
-
         material.SetPass(0);
         material.SetBuffer("buf_Points", outputBuffer);
         material.SetBuffer("buf_Colors", colorBuffer);
 
-        //material.SetFloat("_Size", size);
         material.SetMatrix("world", transform.localToWorldMatrix);
 
         Graphics.DrawProcedural(MeshTopology.Points, outputBuffer.count);
