@@ -67,6 +67,7 @@ public class HeatEquation : MonoBehaviour {
         heat = heatB;
         heatB = heatSwap;
 
+        //TODO Add sliders etc
         engine.DoUpdate((x, y, z, t) => {
             return VoxelEngine.RedBlueValue((float)(heat[x, y, z] - TEMP_ROOM), 0.2f, 0.01f);
         });
