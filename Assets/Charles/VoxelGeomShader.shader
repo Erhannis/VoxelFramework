@@ -13,8 +13,9 @@
 
 		Cull off
 		//Blend SrcAlpha OneMinusSrcAlpha
-		Blend One One
+		//Blend One One
 		//Blend SrcAlpha DstAlpha
+		Blend SrcAlpha One
 		ZWrite off
 		
 		Pass

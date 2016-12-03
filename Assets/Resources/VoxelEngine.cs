@@ -95,12 +95,12 @@ public class VoxelEngine : MonoBehaviour {
         //TODO Fix alpha rendering
         if (val >= 0) {
             float alpha = (brightness * ((val - cutoff) / (1f - cutoff)));
-            //return new Color(1, 0, 0, alpha);
-            return new Color(alpha, 0, 0, alpha);
+            return new Color(1, 0, 0, alpha);
+            //return new Color(alpha, 0, 0, alpha);
         } else {
             float alpha = (brightness * ((-val - cutoff) / (1f - cutoff)));
-            //return new Color(0, 0, 1, alpha);
-            return new Color(0, 0, alpha, alpha);
+            return new Color(0, 0, 1, alpha);
+            //return new Color(0, 0, alpha, alpha);
         }
     }
 
