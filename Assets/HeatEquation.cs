@@ -8,6 +8,12 @@ public class HeatEquation : MonoBehaviour {
     public GameObject xRayPlane;
     public GameObject heatWand;
 
+    private Valve.VR.EVRButtonId gripButton = Valve.VR.EVRButtonId.k_EButton_Grip;
+    private Valve.VR.EVRButtonId triggerButton = Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger;
+    private SteamVR_Controller.Device controller { get { return ((int)controllerTrackedObj.index) >= 0 ? SteamVR_Controller.Input((int)controllerTrackedObj.index) : null; } }
+    private SteamVR_TrackedObject controllerTrackedObj;
+    public GameObject controllerObject;
+
     private VoxelEngine engine;
     private System.Random random = new System.Random();
 
@@ -39,12 +45,20 @@ public class HeatEquation : MonoBehaviour {
             }
         }
 
+        controllerTrackedObj = controllerObject.GetComponent<SteamVR_TrackedObject>();
+
         engine = GetComponent<VoxelEngine>();
         engine.Init(W, H, D);
     }
 
+    private double modifier = -1;
+
     // Update is called once per frame
     void Update () {
+        if (controller != null) {
+            Vector2 v = controller.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger);
+            modifier = (v.x * 2) - 1;
+        }
         //TODO Do threading?  GPU?
         //TODO Not sure if these constants are technically used right - I think voxelSize
         //       should maybe be squared, for instance.
@@ -60,7 +74,7 @@ public class HeatEquation : MonoBehaviour {
         int[] heatSpot = engine.GetCubeCoords(heatWand.transform.position);
         //Debug.Log(heatWand.transform.position + "(" + heatSpot[0] + ", " + heatSpot[1] + ", " + heatSpot[2] + ")");
         if (heatSpot != null) {
-            heatB[heatSpot[0], heatSpot[1], heatSpot[2]] += 1;
+            heatB[heatSpot[0], heatSpot[1], heatSpot[2]] += modifier;
         }
     
         // Swap out buffer
