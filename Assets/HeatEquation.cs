@@ -67,7 +67,8 @@ public class HeatEquation : MonoBehaviour {
             for (int y = 0; y < H; y++) {
                 for (int z = 0; z < D; z++) {
                     double hc = heat[x, y, z];
-                    heatB[x, y, z] = hc + (r * (heat[Math.Max(x - 1, 0), y, z] + heat[Math.Min(x + 1, W - 1), y, z] + heat[x, Math.Max(y - 1, 0), z] + heat[x, Math.Min(y + 1, H - 1), z] + heat[x, y, Math.Max(z - 1, 0)] + heat[x, y, Math.Min(z + 1, D - 1)] - (6 * hc)));
+                    double laplacian = (r * (heat[Math.Max(x - 1, 0), y, z] + heat[Math.Min(x + 1, W - 1), y, z] + heat[x, Math.Max(y - 1, 0), z] + heat[x, Math.Min(y + 1, H - 1), z] + heat[x, y, Math.Max(z - 1, 0)] + heat[x, y, Math.Min(z + 1, D - 1)] - (6 * hc)));
+                    heatB[x, y, z] = hc + laplacian;
                 }
             }
         }
