@@ -80,6 +80,7 @@
 			void geom(point inputGS p[1], inout TriangleStream<input> triStream)
 			{
 				//float halfS = _Size;
+				//float halfS = 0.5f;
 				float halfS = 0.5f;
 
 				float2 uvs[4];

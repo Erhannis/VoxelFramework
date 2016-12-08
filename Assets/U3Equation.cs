@@ -61,8 +61,11 @@ public class U3Equation : MonoBehaviour {
             }
         }
 
-        amp[7, 7, 7] = 0.001;
-        amp[17, 17, 17] = -0.001;
+        amp[7, 7, 7] = 0.0001;
+        amp1[7, 7, 7] = amp[7, 7, 7] / 2;
+
+        amp[17, 17, 17] = -amp[7, 7, 7];
+        amp1[17, 17, 17] = amp[17, 17, 17] / 2;
 
         controllerTrackedObj = controllerObject.GetComponent<SteamVR_TrackedObject>();
 
@@ -84,22 +87,33 @@ public class U3Equation : MonoBehaviour {
         //double dt3c2 = heatAlpha * tickDur / voxelSize;
         double dt3c2 = 1e-5;
         double max = 0;
+        double min = 0;
+        double total = 0;
         Vector3 maxPos = new Vector3(-1, -1, -1);
+        Vector3 minPos = new Vector3(-1, -1, -1);
         for (int x = 0; x < W; x++) {
             for (int y = 0; y < H; y++) {
                 for (int z = 0; z < D; z++) {
                     double ac = amp[x, y, z];
                     double laplacian = (dt3c2 * (amp[Math.Max(x - 1, 0), y, z] + amp[Math.Min(x + 1, W - 1), y, z] + amp[x, Math.Max(y - 1, 0), z] + amp[x, Math.Min(y + 1, H - 1), z] + amp[x, y, Math.Max(z - 1, 0)] + amp[x, y, Math.Min(z + 1, D - 1)] - (6 * ac)));
-                    ampFuture[x, y, z] = (3*ac) + (-3*amp1[x, y, z]) + (amp2[x, y, z]) + laplacian;
+                    double af = (3*ac) + (-3*amp1[x, y, z]) + (amp2[x, y, z]) + laplacian;
+                    ampFuture[x, y, z] = af;
                     //ampFuture[x, y, z] = (2 * ac) - amp1[x, y, z] + laplacian; 
-                    if (Math.Abs(ampFuture[x, y, z]) > max) {
-                        max = ampFuture[x, y, z];
+                    if (af > max) {
+                        max = af;
                         maxPos = new Vector3(x, y, z);
                     }
+                    if (af < min) {
+                        min = af;
+                        minPos = new Vector3(x, y, z);
+                    }
+                    total += af;
                 }
             }
         }
         Debug.Log("max: " + max + " @ " + maxPos);
+        Debug.Log("min: " + min + " @ " + minPos);
+        Debug.Log("total: " + total);
         int[] waveSpot = engine.GetCubeCoords(waveWand.transform.position);
         //Debug.Log(heatWand.transform.position + "(" + heatSpot[0] + ", " + heatSpot[1] + ", " + heatSpot[2] + ")");
         if (waveSpot != null) {
@@ -116,6 +130,10 @@ public class U3Equation : MonoBehaviour {
 
         //TODO Add sliders etc
         engine.DoUpdate((x, y, z, t) => {
+            //double dx = (amp[Math.Min(x + 1, W - 1), y, z] - amp[Math.Max(x - 1, 0), y, z]) / (2 * voxelSize);
+            //double dy = (amp[x, Math.Min(y + 1, H - 1), z] - amp[x, Math.Max(y - 1, 0), z]) / (2 * voxelSize);
+            //double dz = (amp[x, y, Math.Min(z + 1, D - 1)] - amp[x, y, Math.Max(z - 1, 0)]) / (2 * voxelSize);
+            //return new Color((float)dx, (float)dy, (float)dz, 1);
             return VoxelEngine.RedBlueValue((float)(amp[x, y, z]), 0.2f, 0.01f);
         });
     }
